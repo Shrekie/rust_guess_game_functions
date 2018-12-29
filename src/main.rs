@@ -2,81 +2,113 @@ use std::io;
 use std::cmp::Ordering;
 use rand::Rng;
 
-fn generate_random() -> u32 {
+struct Question;
 
-    println!("Guess the random number!"); 
-    rand::thread_rng().gen_range(1, 101)
+impl Question {
 
-}
+    fn insert() -> u32 {
 
-fn input_guess() -> u32 {
+        let mut guess = String::new();
+        
+        io::stdin().read_line(&mut guess)
+            .expect("Failed to read line");
 
-    let mut guess = String::new();
-    
-    io::stdin().read_line(&mut guess)
-    .expect("Failed to read line");
+        let guess: u32 = match guess.trim().parse() {
 
-    let guess: u32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => {
+                println!("Only numbers please");
+                Question::insert()
+            }
 
-        Ok(num) => num,
-        Err(_) => {
-            println!("Only numbers please");
-            input_guess()
-        }
+        };
 
-    };
+        guess
 
-    guess
+    }
 
-}
+    fn check(guess: &u32, secret_number: &u32) -> bool {
 
-fn evaluate_guess(guess: &u32, secret_number: &u32) -> bool {
+        match guess.cmp(&secret_number) {
 
-    match guess.cmp(&secret_number) {
+            Ordering::Less => {
+                println!("Too small!");
+                false
+            },
+            Ordering::Greater => { 
+                println!("Too big!");
+                false
+            },
+            Ordering::Equal => {
+                println!("You win!");
+                true
+            }
 
-        Ordering::Less => {
-            println!("Too small!");
-            false
-        },
-        Ordering::Greater => { 
-            println!("Too big!");
-            false
-        },
-        Ordering::Equal => {
-            println!("You win!");
-            true
         }
 
     }
 
 }
 
-fn guess_session(secret_number: &u32) -> bool {
+struct Guess {
 
-    let mut won_guess = false;
-
-    while !won_guess {
-
-        println!("Please input your guess");
-        let guess = input_guess();
-
-        println!("You guessed: {}", guess);
-        won_guess = evaluate_guess(&guess, &secret_number)
-
-    }
-
-    won_guess
+    secret: u32,
+    won: bool,
 
 }
 
-fn stage_guess() {
+impl Guess {
 
-    let mut secret_number = generate_random();
+    fn serve() -> u32 {
 
-    if guess_session(&secret_number) {
+        println!("Guess the random number!"); 
+        rand::thread_rng().gen_range(1, 101)
 
-        secret_number = generate_random();
-        guess_session(&secret_number);
+    }
+
+    fn new() -> Guess {
+
+        Guess {
+            secret: Guess::serve(),
+            won: false,
+        }
+
+    }
+
+    fn cycle(&mut self) {
+
+        loop {
+
+            if self.session() {
+
+                self.restart();
+
+            }
+
+        }
+
+    }
+
+    fn session(&mut self) -> bool {
+
+        while !self.won {
+            
+            println!("Please input your guess.");
+            let guess = Question::insert();
+
+            println!("You guessed: {}", guess);
+            self.won = Question::check(&guess, &self.secret);
+
+        }
+
+        self.won
+
+    }
+
+    fn restart(&mut self) {
+
+        self.secret = Guess::serve();
+        self.won = false;
 
     }
 
@@ -84,6 +116,8 @@ fn stage_guess() {
 
 fn main() {
 
-    stage_guess()
+    let mut guess = Guess::new();
+
+    guess.cycle();
 
 }
