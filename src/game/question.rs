@@ -1,30 +1,28 @@
-use std::io;
 use std::cmp::Ordering;
+use rand::Rng;
 
-pub fn insert() -> u32 {
+mod numbin;
 
-    let mut guess = String::new();
-    
-    io::stdin().read_line(&mut guess)
-        .expect("Failed to read line");
+pub fn ask() -> u32 {
 
-    let guess: u32 = match guess.trim().parse() {
+    let mut answer = String::new();
 
-        Ok(num) => num,
-        Err(_) => {
-            println!("Only numbers please");
-            insert()
+    loop {
+
+        if let Some(answer) = 
+            numbin::force(&mut answer, "Only numbers please:") {
+
+            break answer;
+
         }
 
-    };
-
-    return guess;
+    }
 
 }
 
-pub fn check(guess: &u32, secret_number: &u32) -> bool {
+pub fn check(guess: &u32, secret: &u32) -> bool {
 
-    match guess.cmp(&secret_number) {
+    match guess.cmp(&secret) {
 
         Ordering::Less => {
             println!("Too small!");
@@ -40,5 +38,12 @@ pub fn check(guess: &u32, secret_number: &u32) -> bool {
         }
 
     }
+
+}
+
+pub fn serve() -> u32 {
+
+    println!("Guess the random number!"); 
+    rand::thread_rng().gen_range(1, 101)
 
 }

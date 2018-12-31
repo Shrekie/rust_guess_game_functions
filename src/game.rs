@@ -1,7 +1,5 @@
 mod question;
 
-use rand::Rng;
-
 pub struct Guess {
 
     secret: u32,
@@ -10,18 +8,11 @@ pub struct Guess {
 }
 
 impl Guess {
-
-    fn serve() -> u32 {
-
-        println!("Guess the random number!"); 
-        rand::thread_rng().gen_range(1, 101)
-
-    }
  
     pub fn new() -> Guess {
 
         Guess {
-            secret: Guess::serve(),
+            secret: question::serve(),
             won: false,
         }
 
@@ -43,23 +34,25 @@ impl Guess {
 
     fn session(&mut self) -> bool {
 
-        while !self.won {
+        loop {
             
-            println!("Please input your guess.");
-            let guess = question::insert();
+            println!("Please input your guess:");
+            let guess = question::ask();
 
             println!("You guessed: {}", guess);
-            self.won = question::check(&guess, &self.secret);
+            if let true = question::check(&guess, &self.secret) {
+
+                break true;
+                
+            }
 
         }
-
-        self.won
 
     }
 
     fn restart(&mut self) {
 
-        self.secret = Guess::serve();
+        self.secret = question::serve();
         self.won = false;
 
     }
